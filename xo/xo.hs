@@ -1,40 +1,49 @@
 -- toy program for tic-tac-toe
+-- TODO:
+--   * check if moves do not replace eachother
+--   * find out why some messages are printed twice
+--   * add unittests
 import Data.List
 import qualified Data.Sequence
 import Data.Sequence (Seq, fromList, chunksOf, update)
 import Data.Foldable (toList)
+import Data.Char (isDigit)
 
 type Board = Seq
+
 type Move = Board Place -> IO (Board Place)
-data Outcome = XWins | OWins | Tie deriving (Show, Eq)
+
+data Outcome = XWins | OWins | Tie deriving (Show)
+
 data Place = X | O | Empty deriving (Show, Eq)
-
-
-emptyBoard:: Board Place
-emptyBoard = Data.Sequence.replicate 9 Empty
 
 play:: Board Place -> [Move] -> IO Outcome
 play board (nextMove:moves) = do
-  putStrLn $ draw board
-  putStrLn "\nnext move..."
+  putStrLn $ "\nCurrent board:\n\n" ++ draw board ++ "\n"
   newBoard <- nextMove board
-  play newBoard moves
+  case outcome newBoard of
+    Tie -> play newBoard moves
+    a -> do
+      putStrLn $ "\nFinal board:\n\n" ++ draw newBoard
+      return a
 play board [] = do
-  putStrLn "\nfinal board:"
-  putStrLn $ draw board
-  putStrLn "\nthe result:"
-  return $ outcome board
+  putStrLn $ "\nFinal board:\n\n" ++ draw board
+  return Tie
 
-demoMoves:: [Move]
-demoMoves = [autoMove 5 X, autoMove 4 O,
-             autoMove 1 X, autoMove 6 O,
-             autoMove 8 X, autoMove 2 O]
-            where autoMove index token = return . update index token
+player:: Place -> Move
+player token board = do
+  putStrLn $ "Place an " ++ show token ++ " token at this location (0-8):"
+  char <- getChar
+  if isDigit char
+    then return $ update (read [char]) token board
+    else player token board
 
 main:: IO ()
 main = do
-    final <- play emptyBoard demoMoves
-    putStrLn $ show final
+    result <- play startBoard moves
+    putStrLn $ "\nthe result is: " ++ show result
+  where startBoard = Data.Sequence.replicate 9 Empty
+        moves = take 9 $ cycle $ player <$> [X, O]
 
 draw:: Board Place -> String
 draw = intercalate "\n--+---+--\n" . map drawRow . toMatrix
@@ -45,9 +54,6 @@ draw = intercalate "\n--+---+--\n" . map drawRow . toMatrix
 toMatrix:: Board a -> [[a]]
 toMatrix = toList . (fmap toList) . (chunksOf 3)
 
-rotate:: Board a -> Board a
-rotate = fromList . concat . transpose . reverse . toMatrix
-
 outcome:: Board Place -> Outcome
 outcome b = if isWinner (positionsOf X) then XWins
             else if isWinner (positionsOf O) then OWins else Tie
@@ -56,7 +62,10 @@ outcome b = if isWinner (positionsOf X) then XWins
 isWinner:: Board Bool -> Bool
 isWinner b = (isWinnerLeftToRight b) || (isWinnerLeftToRight $ rotate b)
 
+rotate:: Board a -> Board a
+rotate = fromList . concat . transpose . reverse . toMatrix
+
 isWinnerLeftToRight:: Board Bool -> Bool
 isWinnerLeftToRight b = any and (toMatrix b)  -- row winner
                 || and [asList !! x | x <- [0, 4, 8]]  -- diagonal winner
-                   where asList = toList b
+                  where asList = toList b
