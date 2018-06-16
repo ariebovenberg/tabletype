@@ -52,15 +52,17 @@ draw = intercalate "\n--+---+--\n" . map drawRow . toMatrix
              drawPlace a = show a
 
 toMatrix:: Board a -> [[a]]
-toMatrix = toList . (fmap toList) . (chunksOf 3)
+toMatrix = toList . fmap toList . chunksOf 3
 
 outcome:: Board Place -> Outcome
-outcome b = if isWinner (positionsOf X) then XWins
-            else if isWinner (positionsOf O) then OWins else Tie
-            where positionsOf t = fmap (== t) b
+outcome b
+  | isWinner (positionsOf X) = XWins
+  | isWinner (positionsOf O) = OWins
+  | otherwise = Tie
+  where positionsOf t = fmap (== t) b
 
 isWinner:: Board Bool -> Bool
-isWinner b = (isWinnerLeftToRight b) || (isWinnerLeftToRight $ rotate b)
+isWinner b = isWinnerLeftToRight b || isWinnerLeftToRight (rotate b)
 
 rotate:: Board a -> Board a
 rotate = fromList . concat . transpose . reverse . toMatrix
