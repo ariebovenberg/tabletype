@@ -3,11 +3,11 @@
 --   * check if moves do not replace eachother
 --   * find out why some messages are printed twice
 --   * add unittests
-import Data.List
+import           Data.List
 import qualified Data.Sequence
-import Data.Sequence (Seq, fromList, chunksOf, update)
-import Data.Foldable (toList)
-import Data.Char (isDigit)
+import           Data.Sequence (Seq, fromList, chunksOf, update)
+import           Data.Foldable (toList)
+import           Data.Char (isDigit)
 
 type Board = Seq
 
@@ -43,13 +43,13 @@ main = do
     result <- play startBoard moves
     putStrLn $ "\nthe result is: " ++ show result
   where startBoard = Data.Sequence.replicate 9 Empty
-        moves = take 9 $ cycle $ player <$> [X, O]
+        moves      = take 9 $ cycle $ player <$> [X, O]
 
 draw:: Board Place -> String
 draw = intercalate "\n--+---+--\n" . map drawRow . toMatrix
-       where drawRow = intercalate " | " . map drawPlace
+       where drawRow         = intercalate " | " . map drawPlace
              drawPlace Empty = " "
-             drawPlace a = show a
+             drawPlace a     = show a
 
 toMatrix:: Board a -> [[a]]
 toMatrix = toList . fmap toList . chunksOf 3
@@ -58,7 +58,7 @@ outcome:: Board Place -> Outcome
 outcome b
   | isWinner (positionsOf X) = XWins
   | isWinner (positionsOf O) = OWins
-  | otherwise = Tie
+  | otherwise                = Tie
   where positionsOf t = fmap (== t) b
 
 isWinner:: Board Bool -> Bool
@@ -69,5 +69,5 @@ rotate = fromList . concat . transpose . reverse . toMatrix
 
 isWinnerLeftToRight:: Board Bool -> Bool
 isWinnerLeftToRight b = any and (toMatrix b)  -- row winner
-                || and [asList !! x | x <- [0, 4, 8]]  -- diagonal winner
-                  where asList = toList b
+                        || and [asList !! x | x <- [0, 4, 8]]  -- diagonal winner
+                        where asList = toList b
