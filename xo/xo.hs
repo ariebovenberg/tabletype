@@ -17,7 +17,7 @@ data Outcome = XWins | OWins | Tie deriving (Show)
 
 data Place = X | O | Empty deriving (Show, Eq)
 
-play:: Board Place -> [Move] -> IO Outcome
+play :: Board Place -> [Move] -> IO Outcome
 play board (nextMove:moves) = do
   putStrLn $ "\nCurrent board:\n\n" ++ draw board ++ "\n"
   newBoard <- nextMove board
@@ -30,7 +30,7 @@ play board [] = do
   putStrLn $ "\nFinal board:\n\n" ++ draw board
   return Tie
 
-player:: Place -> Move
+player :: Place -> Move
 player token board = do
   putStrLn $ "Place an " ++ show token ++ " token at this location (0-8):"
   char <- getChar
@@ -38,36 +38,36 @@ player token board = do
     then return $ update (read [char]) token board
     else player token board
 
-main:: IO ()
+main :: IO ()
 main = do
     result <- play startBoard moves
     putStrLn $ "\nthe result is: " ++ show result
   where startBoard = Data.Sequence.replicate 9 Empty
         moves      = take 9 $ cycle $ player <$> [X, O]
 
-draw:: Board Place -> String
+draw :: Board Place -> String
 draw = intercalate "\n--+---+--\n" . map drawRow . toMatrix
        where drawRow         = intercalate " | " . map drawPlace
              drawPlace Empty = " "
              drawPlace a     = show a
 
-toMatrix:: Board a -> [[a]]
+toMatrix :: Board a -> [[a]]
 toMatrix = toList . fmap toList . chunksOf 3
 
-outcome:: Board Place -> Outcome
+outcome :: Board Place -> Outcome
 outcome b
   | isWinner (positionsOf X) = XWins
   | isWinner (positionsOf O) = OWins
   | otherwise                = Tie
   where positionsOf t = fmap (== t) b
 
-isWinner:: Board Bool -> Bool
+isWinner :: Board Bool -> Bool
 isWinner b = isWinnerLeftToRight b || isWinnerLeftToRight (rotate b)
 
-rotate:: Board a -> Board a
+rotate :: Board a -> Board a
 rotate = fromList . concat . transpose . reverse . toMatrix
 
-isWinnerLeftToRight:: Board Bool -> Bool
+isWinnerLeftToRight :: Board Bool -> Bool
 isWinnerLeftToRight b = any and (toMatrix b)  -- row winner
                         || and [asList !! x | x <- [0, 4, 8]]  -- diagonal winner
                         where asList = toList b
