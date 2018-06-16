@@ -3,11 +3,11 @@
 --   * check if moves do not replace eachother
 --   * find out why some messages are printed twice
 --   * add unittests
-import           Data.List
-import qualified Data.Sequence
-import           Data.Sequence (Seq, fromList, chunksOf, update)
+import           Data.Char     (isDigit)
 import           Data.Foldable (toList)
-import           Data.Char (isDigit)
+import           Data.List
+import           Data.Sequence (Seq, chunksOf, fromList, update)
+import qualified Data.Sequence
 
 type Board = Seq
 
