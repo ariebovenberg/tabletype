@@ -1,8 +1,8 @@
+module Xo where
 -- toy program for tic-tac-toe
 -- TODO:
 --   * check if moves do not replace eachother
 --   * find out why some messages are printed twice
---   * add unittests
 import           Data.Char     (isDigit)
 import           Data.Foldable (toList)
 import           Data.List
