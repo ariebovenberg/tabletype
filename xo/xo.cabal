@@ -19,6 +19,7 @@ executable xo
   main-is:             xo.hs
   -- other-modules:
   -- other-extensions:
+  ghc-options:         -main-is Xo
   build-depends:       base >=4.11 && <4.12,
                        containers >= 0.5.11.0
   -- hs-source-dirs:
